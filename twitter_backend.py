@@ -69,18 +69,19 @@ def get_images(tweets):
         if 'media' in status.entities:
             
             for media in status.entities['media']:
-                if "/img/" not in media: #check if its a thumbnail
+                if "/img/" not in media['media_url']: #check if its a thumbnail
                     image_set.add(media['media_url'])
 
             #extended_entities is other pictures in an album
             for media in status.extended_entities['media']:
-                if "/img/" not in media:
+                if "/img/" not in media['media_url']:
                     image_set.add(media['media_url'])
 
     return image_set
 
 
 def download_image(image_url, directory):
+    
     web_url = "http://pbs.twimg.com/media/"
     directory = os.getcwd() + directory
 
@@ -91,8 +92,6 @@ def download_image(image_url, directory):
     print(image_filename)
 
     urllib.request.urlretrieve(image_url, full_file_name)
-
-    
     
 
 if __name__ == "__main__":
