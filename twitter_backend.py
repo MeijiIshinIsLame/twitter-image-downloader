@@ -69,10 +69,13 @@ def get_images(tweets):
         if 'media' in status.entities:
             
             for media in status.entities['media']:
-                image_set.add(media['media_url'])
-                
+                if "/img/" not in media: #check if its a thumbnail
+                    image_set.add(media['media_url'])
+
+            #extended_entities is other pictures in an album
             for media in status.extended_entities['media']:
-                image_set.add(media['media_url'])
+                if "/img/" not in media:
+                    image_set.add(media['media_url'])
 
     return image_set
 
@@ -82,12 +85,7 @@ def download_image(image_url, directory):
     directory = os.getcwd() + directory
 
     #take out the twimg stuff
-    #the if statement is because thumbnails are saved under a different URL system
-    #considering deleting this because I'm not sure if I want thumbnails
-    if '/img/' in image_url:
-        image_filename = image_url.split('/img/')[1]
-    else:        
-        image_filename = image_url.replace(web_url, '')
+    image_filename = image_url.replace(web_url, '')
         
     full_file_name = directory + image_filename
     print(image_filename)
