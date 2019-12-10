@@ -52,6 +52,22 @@ def get_tweets(account_name, api):
 
     return tweets
 
+
+def get_images(tweets):
+
+    image_set = set()
+    
+    for status in tweets:
+        media = status.entities.get('media', [])
+        
+        if(len(media) > 0):
+            image_set.add(media[0]['media_url'])
+
+    return image_set
+
+
+    
+
 if __name__ == "__main__":
     consumer_key = 'LWmcAOW8h8KW7k6bQ5uoDcjQc'
     consumer_secret = '8qkaVo4wGc9H7TYgduCGIO0par6cl7ti7fTvS6pqoGgz47Mj06'
@@ -62,5 +78,12 @@ if __name__ == "__main__":
 
     username_list = get_accounts("usernames.txt")
 
+    tweets = []
+
     for name in username_list:
-        tweets = get_tweets(name, api)
+        tweets += get_tweets(name, api)
+
+    image_set = get_images(tweets)
+
+    for img in image_set:
+        print(img)
