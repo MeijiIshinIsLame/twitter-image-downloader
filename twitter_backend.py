@@ -1,6 +1,9 @@
 import tweepy
 from tweepy import OAuthHandler
 import json
+import wget
+import os
+import urllib.request
 
 
 #initializes api
@@ -49,7 +52,7 @@ def get_tweets(account_name, api):
     tweets = []
 
     #uses cursor to traverse through all tweets (until it hits the limit)
-    for status in tweepy.Cursor(api.user_timeline, screen_name=account_name, tweet_mode="extended").items():
+    for status in tweepy.Cursor(api.user_timeline, screen_name=account_name, include_rts=True,  tweet_mode="extended").items():
         tweets.append(status)
         print("tweets appended: ", len(tweets))
 
@@ -62,12 +65,36 @@ def get_images(tweets):
     image_set = set()
     
     for status in tweets:
-        media = status.entities.get('media', [])
         
-        if(len(media) > 0):
-            image_set.add(media[0]['media_url'])
+        if 'media' in status.entities:
+            
+            for media in status.entities['media']:
+                image_set.add(media['media_url'])
+                
+            for media in status.extended_entities['media']:
+                image_set.add(media['media_url'])
 
     return image_set
+
+
+def download_image(image_url, directory):
+    web_url = "http://pbs.twimg.com/media/"
+    directory = os.getcwd() + directory
+
+    #take out the twimg stuff
+    #the if statement is because thumbnails are saved under a different URL system
+    #considering deleting this because I'm not sure if I want thumbnails
+    if '/img/' in image_url:
+        image_filename = image_url.split('/img/')[1]
+    else:        
+        image_filename = image_url.replace(web_url, '')
+        
+    full_file_name = directory + image_filename
+    print(image_filename)
+
+    urllib.request.urlretrieve(image_url, full_file_name)
+
+    
     
 
 if __name__ == "__main__":
@@ -76,6 +103,8 @@ if __name__ == "__main__":
     consumer_secret = '8qkaVo4wGc9H7TYgduCGIO0par6cl7ti7fTvS6pqoGgz47Mj06'
     access_token = '1644845690-M3l9cOmqvVN0e0uNCNZkIHfYEOM76iYQWbimJwT'
     access_secret = 'pNhRXvZ1U2U0WAoQ29i9S5wuhH87jFrNC0BfuDqIPq0QE'
+
+    image_directory = "/media"
 
     api = initialize_tweepy(consumer_key, consumer_secret, access_token, access_secret)
     username_list = get_accounts("usernames.txt")
@@ -86,5 +115,8 @@ if __name__ == "__main__":
 
     image_set = get_images(tweets)
 
-    for img in image_set:
-        print(img)
+    for image in image_set:
+        download_image(image, "/media/")
+        
+
+    
